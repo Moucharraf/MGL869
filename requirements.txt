@@ -6,3 +6,4 @@ joblib
 shap
 matplotlib
 numpy
+flask-restx>=1.1.0

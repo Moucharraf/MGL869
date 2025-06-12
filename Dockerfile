@@ -16,3 +16,4 @@ EXPOSE 5000
 
 # Commande pour lancer le serveur
 CMD ["python", "server.py"]
+
