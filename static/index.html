@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Test de Prédiction du Modèle</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px;
+            background: linear-gradient(120deg, #e0f7fa 0%, #f7f7f7 100%);
+            color: #2e3d49;
+        }
+        .section {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+            padding: 32px 24px;
+            margin-bottom: 48px;
+            border-left: 8px solid #4CAF50;
+            position: relative;
+            overflow: hidden;
+        }
+        h1 {
+            color: #2e7d32;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #b2dfdb;
+            margin-bottom: 18px;
+            background: #f5fefb;
+            border-radius: 10px 10px 0 0;
+            overflow-x: auto;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 14px 0 10px 0;
+            cursor: pointer;
+            font-size: 1.08em;
+            color: #388e3c;
+            font-weight: 600;
+            border: none;
+            background: none;
+            outline: none;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            position: relative;
+        }
+        .tab.active {
+            color: #fff;
+            background: linear-gradient(90deg, #43a047 60%, #388e3c 100%);
+            border-radius: 10px 10px 0 0;
+        }
+        .tab:not(.active):hover {
+            background: #e0f2f1;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        fieldset {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        legend {
+            font-weight: 600;
+            color: #388e3c;
+            padding: 0 10px;
+            font-size: 1.1em;
+        }
+        .form-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .form-section label {
+            display: flex;
+            flex-direction: column;
+            font-size: 1.07em;
+            color: #2e3d49;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .form-section input, .form-section select {
+            margin-top: 7px;
+            padding: 11px 10px;
+            border: 1.5px solid #b2dfdb;
+            border-radius: 7px;
+            font-size: 1em;
+            background: #fafdff;
+            transition: all 0.3s ease;
+        }
+        .form-section input:focus, .form-section select:focus {
+            border: 2px solid #43a047;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(67, 160, 71, 0.2);
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            gap: 10px;
+        }
+        .nav-btn {
+            padding: 12px 24px;
+            background: linear-gradient(90deg, #43a047 60%, #388e3c 100%);
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(67, 160, 71, 0.2);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .nav-btn:hover {
+            background: linear-gradient(90deg, #388e3c 60%, #43a047 100%);
+            box-shadow: 0 6px 18px rgba(56, 142, 60, 0.3);
+        }
+        .nav-btn.secondary {
+            background: linear-gradient(90deg, #607d8b 60%, #455a64 100%);
+        }
+        .nav-btn.secondary:hover {
+            background: linear-gradient(90deg, #455a64 60%, #607d8b 100%);
+        }
+        .nav-btn.predict {
+            background: linear-gradient(90deg, #ff9800 60%, #f57c00 100%);
+            width: 100%;
+            margin-top: 20px;
+        }
+        .nav-btn.predict:hover {
+            background: linear-gradient(90deg, #f57c00 60%, #ff9800 100%);
+        }
+        .result {
+            margin-top: 18px;
+            padding: 18px;
+            border: 1.5px solid #b2dfdb;
+            border-radius: 8px;
+            background: #f9fefc;
+            font-size: 1.08em;
+            animation: fadeIn 0.5s ease;
+        }
+        .error {
+            color: #b71c1c;
+            background: #ffebee;
+            border-color: #e57373;
+        }
+        #explainability {
+            border: 2px dashed #43a047;
+            background: #e8f5e9;
+            color: #1b5e20;
+            font-size: 1.08em;
+            margin-top: 28px;
+            margin-bottom: 10px;
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(67, 160, 71, 0.1);
+            animation: fadeIn 0.8s ease;
+        }
+        #explainability img {
+            border: 1.5px solid #b2dfdb;
+            background: #fff;
+            margin: 15px 0;
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .prediction-card {
+            background: #e8f5e9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .prediction-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin: 10px 0;
+            color: #2e7d32;
+        }
+        .risk-high {
+            color: #c62828;
+        }
+        .risk-low {
+            color: #2e7d32;
+        }
+        .probability-bar {
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #81c784, #4caf50);
+            border-radius: 12px;
+            transition: width 1s ease;
+            width: 0;
+        }
+        .probability-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #616161;
+            margin-top: 5px;
+        }
+        .progress-container {
+            margin: 20px 0;
+            background: #f5f5f5;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #2e7d32);
+            width: 0;
+            transition: width 0.5s ease;
+        }
+        .batch-section {
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .file-upload {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            padding: 12px;
+            border: 2px dashed #64b5f6;
+            border-radius: 8px;
+            background: #f5fbff;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .file-input:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+        .requirements {
+            font-size: 0.9em;
+            color: #616161;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .status-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status-warning {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+        .status-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 800px) {
+            body {
+                max-width: 100vw;
+                padding: 8px;
+            }
+            .section {
+                padding: 10px 2vw;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+            .tab {
+                min-width: 110px;
+                font-size: 0.95em;
+                padding: 10px 5px;
+            }
+            .form-section {
+                grid-template-columns: 1fr;
+            }
+            .navigation-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="section">
+        <h1><span>🔎</span> Prédiction d'abandon scolaire</h1>
+
+        <div class="tabs">
+            <button type="button" class="tab active" data-tab="tab1">👤 Infos personnelles</button>
+            <button type="button" class="tab" data-tab="tab2">🎓 Académiques</button>
+            <button type="button" class="tab" data-tab="tab3">👪 Parents</button>
+            <button type="button" class="tab" data-tab="tab4">📊 Performances</button>
+            <button type="button" class="tab" data-tab="tab5">📁 Prédiction par lot</button>
+        </div>
+
+        <form id="single-form">
+            <div class="tab-content active" id="tab1">
+                <fieldset class="form-section">
+                    <legend>👤 Informations personnelles</legend>
+                    <label>Genre
+                        <select name="Gender" required>
+                            <option value="">--Choisir--</option>
+                            <option value="male">Masculin</option>
+                            <option value="female">Féminin</option>
+                        </select>
+                    </label>
+                    <label>Âge à l'inscription
+                        <input type="number" name="Age at enrollment" required min="15" max="50">
+                    </label>
+                    <label>Nationalité
+                        <select name="Nacionality" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Portuguese">Portugais</option>
+                            <option value="German">Allemand</option>
+                            <option value="Spanish">Espagnol</option>
+                            <option value="Italian">Italien</option>
+                            <option value="Dutch">Néerlandais</option>
+                            <option value="English">Anglais</option>
+                            <option value="Lithuanian">Lituanien</option>
+                            <option value="Angolan">Angolais</option>
+                            <option value="Cape Verdean">Cap-Verdien</option>
+                            <option value="Guinean">Guinéen</option>
+                            <option value="Mozambican">Mozambicain</option>
+                            <option value="Santomean">Santoméen</option>
+                            <option value="Turkish">Turc</option>
+                            <option value="Brazilian">Brésilien</option>
+                            <option value="Romanian">Roumain</option>
+                            <option value="Moldova (Republic of)">Moldave</option>
+                            <option value="Mexican">Mexicain</option>
+                            <option value="Ukrainian">Ukrainien</option>
+                            <option value="Russian">Russe</option>
+                            <option value="Cuban">Cubain</option>
+                            <option value="Colombian">Colombien</option>
+                        </select>
+                    </label>
+                    <label>Statut marital
+                        <select name="Marital Status" required>
+                            <option value="">--Choisir--</option>
+                            <option value="single">Célibataire</option>
+                            <option value="married">Marié(e)</option>
+                            <option value="widower">Veuf/Veuve</option>
+                            <option value="divorced">Divorcé(e)</option>
+                            <option value="facto union">Union de fait</option>
+                            <option value="legally separated">Séparé(e) légalement</option>
+                        </select>
+                    </label>
+                </fieldset>
+
+                <div class="navigation-buttons">
+                    <div></div> <!-- Empty div for spacing -->
+                    <button type="button" class="nav-btn" data-next="tab2">
+                        Suivant <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab2">
+                <fieldset class="form-section">
+                    <legend>🎓 Informations académiques</legend>
+                    <label>Mode de candidature
+                        <select name="Application mode" required>
+                            <option value="">--Choisir--</option>
+                            <option value="1st phase - general contingent">1ère phase - contingent général</option>
+                            <option value="Ordinance No. 612/93">Ordonnance n° 612/93</option>
+                            <option value="1st phase - special contingent (Azores Island)">1ère phase - contingent spécial (Açores)</option>
+                            <option value="Holders of other higher courses">Titulaires d'autres cours supérieurs</option>
+                            <option value="Ordinance No. 854-B/99">Ordonnance n° 854-B/99</option>
+                            <option value="International student (bachelor)">Étudiant international (licence)</option>
+                            <option value="1st phase - special contingent (Madeira Island)">1ère phase - contingent spécial (Madère)</option>
+                            <option value="2nd phase - general contingent">2ème phase - contingent général</option>
+                            <option value="3rd phase - general contingent">3ème phase - contingent général</option>
+                            <option value="Ordinance No. 533-A/99, item b2) (Different Plan)">Ordonnance n° 533-A/99, item b2) (Plan différent)</option>
+                            <option value="Ordinance No. 533-A/99, item b3 (Other Institution)">Ordonnance n° 533-A/99, item b3 (Autre institution)</option>
+                            <option value="Over 23 years old">Plus de 23 ans</option>
+                            <option value="Transfer">Transfert</option>
+                            <option value="Change of course">Changement de cours</option>
+                            <option value="Technological specialization diploma holders">Titulaires de diplôme de spécialisation technologique</option>
+                            <option value="Change of institution/course">Changement d'établissement/cours</option>
+                            <option value="Short cycle diploma holders">Titulaires de diplôme de cycle court</option>
+                            <option value="Change of institution/course (International)">Changement d'établissement/cours (International)</option>
+                        </select>
+                    </label>
+                    <label>Ordre de candidature
+                        <input type="number" name="Application order" min="0" max="9" required>
+                    </label>
+                    <label>Cours
+                        <select name="Course" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Biofuel Production Technologies">Technologies de production de biocarburants</option>
+                            <option value="Animation and Multimedia Design">Animation et design multimédia</option>
+                            <option value="Social Service (evening attendance)">Service social (soir)</option>
+                            <option value="Agronomy">Agronomie</option>
+                            <option value="Communication Design">Design de communication</option>
+                            <option value="Veterinary Nursing">Soins vétérinaires</option>
+                            <option value="Informatics Engineering">Ingénierie informatique</option>
+                            <option value="Equinculture">Équiculture</option>
+                            <option value="Management">Management</option>
+                            <option value="Social Service">Service social</option>
+                            <option value="Tourism">Tourisme</option>
+                            <option value="Nursing">Infirmerie</option>
+                            <option value="Oral Hygiene">Hygiène buccale</option>
+                            <option value="Advertising and Marketing Management">Gestion de la publicité et du marketing</option>
+                            <option value="Journalism and Communication">Journalisme et communication</option>
+                            <option value="Basic Education">Éducation de base</option>
+                            <option value="Management (evening attendance)">Management (soir)</option>
+                        </select>
+                    </label>
+                    <label>Fréquentation
+                        <select name="Daytime/evening attendance" required>
+                            <option value="">--Choisir--</option>
+                            <option value="daytime">Diurne</option>
+                            <option value="evening">Soir</option>
+                        </select>
+                    </label>
+                    <label>Qualification précédente
+                        <select name="Previous qualification" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Secondary education">Éducation secondaire</option>
+                            <option value="Higher education - bachelor's degree">Éducation supérieure - licence</option>
+                            <option value="Higher education - degree">Éducation supérieure - diplôme</option>
+                            <option value="Higher education - master's">Éducation supérieure - master</option>
+                            <option value="Higher education - doctorate">Éducation supérieure - doctorat</option>
+                            <option value="Frequency of higher education">Fréquence de l'éducation supérieure</option>
+                            <option value="12th year of schooling - not completed">12ème année d'études - non terminée</option>
+                            <option value="11th year of schooling - not completed">11ème année d'études - non terminée</option>
+                            <option value="Other - 11th year of schooling">Autre - 11ème année d'études</option>
+                            <option value="10th year of schooling">10ème année d'études</option>
+                            <option value="10th year of schooling - not completed">10ème année d'études - non terminée</option>
+                            <option value="Basic education 3rd cycle (9th/10th/11th year) or equiv.">Éducation de base 3ème cycle (9ème/10ème/11ème année) ou équiv.</option>
+                            <option value="Basic education 2nd cycle (6th/7th/8th year) or equiv.">Éducation de base 2ème cycle (6ème/7ème/8ème année) ou équiv.</option>
+                            <option value="Technological specialization course">Cours de spécialisation technologique</option>
+                            <option value="Higher education - degree (1st cycle)">Éducation supérieure - diplôme (1er cycle)</option>
+                            <option value="Professional higher technical course">Cours technique supérieur professionnel</option>
+                            <option value="Higher education - master (2nd cycle)">Éducation supérieure - master (2ème cycle)</option>
+                        </select>
+                    </label>
+                    <label>Note de qualification précédente
+                        <input type="number" name="Previous qualification (grade)" min="0" max="200" required>
+                    </label>
+                    <label>Note d'admission
+                        <input type="number" name="Admission grade" min="0" max="200" required>
+                    </label>
+                    <label>Boursier
+                        <select name="Scholarship holder" required>
+                            <option value="">--Choisir--</option>
+                            <option value="yes">Oui</option>
+                            <option value="no">Non</option>
+                        </select>
+                    </label>
+                    <label>Étudiant international
+                        <select name="International" required>
+                            <option value="">--Choisir--</option>
+                            <option value="yes">Oui</option>
+                            <option value="no">Non</option>
+                        </select>
+                    </label>
+                </fieldset>
+
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn secondary" data-prev="tab1">
+                        <span>←</span> Précédent
+                    </button>
+                    <button type="button" class="nav-btn" data-next="tab3">
+                        Suivant <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab3">
+                <fieldset class="form-section">
+                    <legend>👪 Informations parentales</legend>
+                    <label>Qualification de la mère
+                        <select name="Mother's qualification" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Secondary Education - 12th Year of Schooling or Eq.">Éducation secondaire - 12ème année ou équiv.</option>
+                            <option value="Higher Education - Bachelor's Degree">Éducation supérieure - Licence</option>
+                            <option value="Higher Education - Degree">Éducation supérieure - Diplôme</option>
+                            <option value="Higher Education - Master's">Éducation supérieure - Master</option>
+                            <option value="Higher Education - Doctorate">Éducation supérieure - Doctorat</option>
+                            <option value="Frequency of Higher Education">Fréquence de l'éducation supérieure</option>
+                            <option value="12th Year of Schooling - Not Completed">12ème année d'études - non terminée</option>
+                            <option value="11th Year (Old)">11ème année (ancien système)</option>
+                            <option value="Other - 11th Year of Schooling">Autre - 11ème année d'études</option>
+                            <option value="10th Year of Schooling">10ème année d'études</option>
+                            <option value="General commerce course">Cours de commerce général</option>
+                            <option value="Basic Education 3rd Cycle (9th/10th/11th Year) or Equiv.">Éducation de base 3ème cycle (9ème/10ème/11ème année) ou équiv.</option>
+                            <option value="Technical-professional course">Cours technique-professionnel</option>
+                            <option value="7th year of schooling">7ème année d'études</option>
+                            <option value="2nd cycle of the general high school course">2ème cycle du lycée général</option>
+                            <option value="9th Year of Schooling - Not Completed">9ème année d'études - non terminée</option>
+                            <option value="8th year of schooling">8ème année d'études</option>
+                            <option value="Unknown">Inconnu</option>
+                            <option value="Can't read or write">Ne sait ni lire ni écrire</option>
+                            <option value="Can read without having a 4th year of schooling">Sait lire sans avoir terminé la 4ème année</option>
+                            <option value="Basic education 1st cycle (4th/5th year) or equiv.">Éducation de base 1er cycle (4ème/5ème année) ou équiv.</option>
+                            <option value="Basic Education 2nd Cycle (6th/7th/8th Year) or Equiv.">Éducation de base 2ème cycle (6ème/7ème/8ème année) ou équiv.</option>
+                            <option value="Technological specialization course">Cours de spécialisation technologique</option>
+                            <option value="Higher education - degree (1st cycle)">Éducation supérieure - diplôme (1er cycle)</option>
+                            <option value="Specialized higher studies course">Cours d'études supérieures spécialisées</option>
+                            <option value="Professional higher technical course">Cours technique supérieur professionnel</option>
+                            <option value="Higher education - master (2nd cycle)">Éducation supérieure - master (2ème cycle)</option>
+                        </select>
+                    </label>
+                    <label>Qualification du père
+                        <select name="Father's qualification" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Secondary Education - 12th Year of Schooling or Eq.">Éducation secondaire - 12ème année ou équiv.</option>
+                            <option value="Higher Education - Bachelor's Degree">Éducation supérieure - Licence</option>
+                            <option value="Higher Education - Degree">Éducation supérieure - Diplôme</option>
+                            <option value="Higher Education - Master's">Éducation supérieure - Master</option>
+                            <option value="Higher Education - Doctorate">Éducation supérieure - Doctorat</option>
+                            <option value="Frequency of Higher Education">Fréquence de l'éducation supérieure</option>
+                            <option value="12th Year of Schooling - Not Completed">12ème année d'études - non terminée</option>
+                            <option value="11th Year (Old)">11ème année (ancien système)</option>
+                            <option value="Other - 11th Year of Schooling">Autre - 11ème année d'études</option>
+                            <option value="2nd year complementary high school course">2ème année de lycée complémentaire</option>
+                            <option value="10th Year of Schooling">10ème année d'études</option>
+                            <option value="General commerce course">Cours de commerce général</option>
+                            <option value="Basic Education 3rd Cycle (9th/10th/11th Year) or Equiv.">Éducation de base 3ème cycle (9ème/10ème/11ème année) ou équiv.</option>
+                            <option value="Complementary High School Course">Cours de lycée complémentaire</option>
+                            <option value="Technical-professional course">Cours technique-professionnel</option>
+                            <option value="Complementary High School Course - not concluded">Cours de lycée complémentaire - non terminé</option>
+                            <option value="7th year of schooling">7ème année d'études</option>
+                            <option value="2nd cycle of the general high school course">2ème cycle du lycée général</option>
+                            <option value="9th Year of Schooling - Not Completed">9ème année d'études - non terminée</option>
+                            <option value="8th year of schooling">8ème année d'études</option>
+                            <option value="General Course of Administration and Commerce">Cours général d'administration et commerce</option>
+                            <option value="Supplementary Accounting and Administration">Comptabilité et administration supplémentaires</option>
+                            <option value="Unknown">Inconnu</option>
+                            <option value="Can't read or write">Ne sait ni lire ni écrire</option>
+                            <option value="Can read without having a 4th year of schooling">Sait lire sans avoir terminé la 4ème année</option>
+                            <option value="Basic education 1st cycle (4th/5th year) or equiv.">Éducation de base 1er cycle (4ème/5ème année) ou équiv.</option>
+                            <option value="Basic Education 2nd Cycle (6th/7th/8th Year) or Equiv.">Éducation de base 2ème cycle (6ème/7ème/8ème année) ou équiv.</option>
+                            <option value="Technological specialization course">Cours de spécialisation technologique</option>
+                            <option value="Higher education - degree (1st cycle)">Éducation supérieure - diplôme (1er cycle)</option>
+                            <option value="Specialized higher studies course">Cours d'études supérieures spécialisées</option>
+                            <option value="Professional higher technical course">Cours technique supérieur professionnel</option>
+                            <option value="Higher Education - Master (2nd cycle)">Éducation supérieure - Master (2ème cycle)</option>
+                            <option value="Higher Education - Doctorate (3rd cycle)">Éducation supérieure - Doctorat (3ème cycle)</option>
+                        </select>
+                    </label>
+                    <label>Profession de la mère
+                        <select name="Mother's occupation" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Student">Étudiant(e)</option>
+                            <option value="Administrative staff">Personnel administratif</option>
+                            <option value="Health professionals">Professionnels de santé</option>
+                            <option value="Unskilled Workers">Travailleurs non qualifiés</option>
+                            <option value="Personal Services, Security and Safety Workers and Sellers">Services personnels, sécurité et vendeurs</option>
+                            <option value="Other">Autre</option>
+                        </select>
+                    </label>
+                    <label>Profession du père
+                        <select name="Father's occupation" required>
+                            <option value="">--Choisir--</option>
+                            <option value="Student">Étudiant(e)</option>
+                            <option value="Administrative staff">Personnel administratif</option>
+                            <option value="Health professionals">Professionnels de santé</option>
+                            <option value="Unskilled Workers">Travailleurs non qualifiés</option>
+                            <option value="Personal Services, Security and Safety Workers and Sellers">Services personnels, sécurité et vendeurs</option>
+                            <option value="Other">Autre</option>
+                        </select>
+                    </label>
+                </fieldset>
+
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn secondary" data-prev="tab2">
+                        <span>←</span> Précédent
+                    </button>
+                    <button type="button" class="nav-btn" data-next="tab4">
+                        Suivant <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab4">
+                <fieldset class="form-section">
+                    <legend>📊 Performances et contexte</legend>
+                    <label>Déplacé
+                        <select name="Displaced" required>
+                            <option value="">--Choisir--</option>
+                            <option value="yes">Oui</option>
+                            <option value="no">Non</option>
+                        </select>
+                    </label>
+                    <label>Besoins éducatifs spéciaux
+                        <select name="Educational special needs" required>
+                            <option value="">--Choisir--</option>
+                            <option value="yes">Oui</option>
+                            <option value="no">Non</option>
+                        </select>
+                    </label>
+                    <label>Débiteur
+                        <select name="Debtor" required>
+                            <option value="">--Choisir--</option>
+                            <option value="yes">Oui</option>
+                            <option value="no">Non</option>
+                        </select>
+                    </label>
+                    <label>Frais de scolarité à jour
+                        <select name="Tuition fees up to date" required>
+                            <option value="">--Choisir--</option>
+                            <option value="yes">Oui</option>
+                            <option value="no">Non</option>
+                        </select>
+                    </label>
+                    <label>Unités curriculaires 1er semestre (créditées)
+                        <input type="number" name="Curricular units 1st sem (credited)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 1er semestre (inscrites)
+                        <input type="number" name="Curricular units 1st sem (enrolled)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 1er semestre (évaluations)
+                        <input type="number" name="Curricular units 1st sem (evaluations)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 1er semestre (approuvées)
+                        <input type="number" name="Curricular units 1st sem (approved)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 1er semestre (note moyenne)
+                        <input type="number" name="Curricular units 1st sem (grade)" min="0" max="20" step="0.1" required>
+                    </label>
+                    <label>Unités curriculaires 1er semestre (sans évaluations)
+                        <input type="number" name="Curricular units 1st sem (without evaluations)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 2ème semestre (créditées)
+                        <input type="number" name="Curricular units 2nd sem (credited)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 2ème semestre (inscrites)
+                        <input type="number" name="Curricular units 2nd sem (enrolled)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 2ème semestre (évaluations)
+                        <input type="number" name="Curricular units 2nd sem (evaluations)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 2ème semestre (approuvées)
+                        <input type="number" name="Curricular units 2nd sem (approved)" required min="0" max="20">
+                    </label>
+                    <label>Unités curriculaires 2ème semestre (note moyenne)
+                        <input type="number" name="Curricular units 2nd sem (grade)" min="0" max="20" step="0.1" required>
+                    </label>
+                    <label>Unités curriculaires 2ème semestre (sans évaluations)
+                        <input type="number" name="Curricular units 2nd sem (without evaluations)" required min="0" max="20">
+                    </label>
+                    <label>Taux de chômage
+                        <input type="number" step="any" name="Unemployment rate" required min="0" max="30">
+                    </label>
+                    <label>Taux d'inflation
+                        <input type="number" step="any" name="Inflation rate" required min="-10" max="30">
+                    </label>
+                    <label>PIB
+                        <input type="number" step="any" name="GDP" required min="0">
+                    </label>
+                </fieldset>
+
+                <div class="navigation-buttons">
+                    <button type="button" class="nav-btn secondary" data-prev="tab3">
+                        <span>←</span> Précédent
+                    </button>
+                    <button type="submit" class="nav-btn predict">
+                        <span>🚀</span> Effectuer la prédiction
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <div id="single-result"></div>
+        <div id="explainability" class="result" style="display:none;"></div>
+
+        <div class="tab-content" id="tab5">
+            <div class="batch-section">
+                <h2>📁 Prédiction par lot</h2>
+                <p>Chargez un fichier CSV contenant les données des étudiants pour effectuer des prédictions en masse.</p>
+
+                <div class="file-upload">
+                    <label for="batch-file" class="file-input">
+                        <div style="font-size: 3em;">📁</div>
+                        <div><b>Cliquez pour sélectionner un fichier</b></div>
+                        <div style="font-size: 0.9em; color: #666;">ou glissez-déposez votre fichier CSV ici</div>
+                    </label>
+                    <input type="file" id="batch-file" name="file" accept=".csv" style="display: none;" required>
+                    <button type="button" class="nav-btn predict" id="batch-submit">
+                        <span>🚀</span> Lancer la prédiction par lot
+                    </button>
+                </div>
+
+                <div class="requirements">
+                    <h3>Exigences du fichier CSV :</h3>
+                    <ul>
+                        <li>Le fichier doit être au format CSV (valeurs séparées par des virgules)</li>
+                        <li>Doit contenir les mêmes colonnes que le formulaire individuel</li>
+                        <li>La première ligne doit contenir les en-têtes des colonnes</li>
+                        <li>Les valeurs doivent correspondre aux options du formulaire</li>
+                        <li>Taille maximale : 10 Mo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="batch-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Gestion des onglets
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.onclick = function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            };
+        });
+
+        // Navigation entre les onglets
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.onclick = function() {
+                if(this.dataset.next) {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+                    const nextTab = document.querySelector(`.tab[data-tab="${this.dataset.next}"]`);
+                    nextTab.classList.add('active');
+                    document.getElementById(this.dataset.next).classList.add('active');
+                }
+                else if(this.dataset.prev) {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+                    const prevTab = document.querySelector(`.tab[data-tab="${this.dataset.prev}"]`);
+                    prevTab.classList.add('active');
+                    document.getElementById(this.dataset.prev).classList.add('active');
+                }
+            };
+        });
+
+        // Gestion du téléchargement de fichier
+        const fileInput = document.getElementById('batch-file');
+        const fileLabel = document.querySelector('.file-input');
+
+        fileInput.addEventListener('change', function() {
+            if(this.files.length > 0) {
+                fileLabel.innerHTML = `
+                    <div style="font-size: 2em;">📄</div>
+                    <div><b>${this.files[0].name}</b></div>
+                    <div style="font-size: 0.9em; color: #666;">${(this.files[0].size / 1024 / 1024).toFixed(2)} MB</div>
+                `;
+            }
+        });
+
+        // Gestion de la prédiction individuelle
+        document.getElementById('single-form').onsubmit = async function(e) {
+            e.preventDefault();
+
+            // Récupérer toutes les données du formulaire
+            const formData = new FormData(this);
+            const jsonData = {};
+            formData.forEach((value, key) => {
+                jsonData[key] = value;
+            });
+
+            try {
+                // Afficher l'indicateur de progression
+                showResult('#single-result', `
+                    <div style="text-align: center; padding: 20px;">
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+                        <p>Analyse des données en cours...</p>
+                    </div>
+                `);
+
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showResult('#single-result', `<div class="error">${data.error}</div>`, true);
+                    return;
+                }
+
+                // Afficher le résultat de la prédiction
+                const prediction = data.prediction;
+                const probability = data.probability;
+
+                showResult('#single-result', `
+                    <div class="prediction-card">
+                        <h3>Résultat de la prédiction</h3>
+                        <div class="prediction-value ${prediction ? 'risk-high' : 'risk-low'}">
+                            ${prediction ? 'RISQUE D\'ABANDON' : 'FAIBLE RISQUE'}
+                        </div>
+
+                        <div class="probability-bar">
+                            <div class="probability-fill" style="width: ${probability * 100}%"></div>
+                        </div>
+                        <div class="probability-labels">
+                            <div>0%</div>
+                            <div>50%</div>
+                            <div>100%</div>
+                        </div>
+
+                        <p>Probabilité d'abandon : <b>${(probability * 100).toFixed(1)}%</b></p>
+                        <p>Statut : <span class="status ${prediction ? 'status-error' : 'status-success'}">
+                            ${prediction ? 'Risque élevé' : 'Risque faible'}
+                        </span></p>
+                    </div>
+                `);
+
+                // Afficher l'explicabilité
+                const explainDiv = document.getElementById('explainability');
+                explainDiv.style.display = 'block';
+
+                if (data.explain_plot) {
+                    explainDiv.innerHTML = `
+                        <h3>Explication de la prédiction</h3>
+                        <p>Le graphique ci-dessous montre les variables qui ont le plus influencé cette prédiction :</p>
+                        <div style="background: white; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <img src="data:image/png;base64,${data.explain_plot}"
+                                alt="Graphique d'explicabilité"
+                                style="max-width: 100%; height: auto;">
+                        </div>
+                        <div class="info-box" style="background: #fff3e0; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <h4 style="color: #e65100; margin-top: 0;">Comment interpréter le graphique :</h4>
+                            <ul style="margin: 10px 0;">
+                                <li>Les barres rouges indiquent les variables qui augmentent le risque de décrochage</li>
+                                <li>Les barres bleues indiquent les variables qui diminuent le risque de décrochage</li>
+                                <li>Plus la barre est longue, plus l'influence de la variable est importante</li>
+                            </ul>
+                        </div>
+                        ${data.explain_text}
+                    `;
+                } else {
+                    explainDiv.innerHTML = `
+                        <div class="error">
+                            Désolé, l'explicabilité n'est pas disponible pour cette prédiction.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                showResult('#single-result', `<div class="error">Erreur lors de la prédiction: ${error.message}</div>`, true);
+            }
+        };
+
+        // Simulation de prédiction par lot
+        document.getElementById('batch-submit').onclick = function() {
+            if(!fileInput.files.length) {
+                alert('Veuillez sélectionner un fichier CSV');
+                return;
+            }
+
+            showResult('#batch-result', `
+                <div style="text-align: center; padding: 20px;">
+                    <div class="progress-container">
+                        <div class="progress-bar" id="batch-progress-bar"></div>
+                    </div>
+                    <p>Traitement du fichier en cours...</p>
+                </div>
+            `);
+
+            // Simulation de progression
+            let progress = 0;
+            const progressBar = document.getElementById('batch-progress-bar');
+            const interval = setInterval(() => {
+                progress += 2;
+                progressBar.style.width = `${progress}%`;
+                if(progress >= 100) {
+                    clearInterval(interval);
+                    simulateBatchResult();
+                }
+            }, 100);
+
+            // Simuler le résultat du traitement par lot
+            function simulateBatchResult() {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                fetch('/predict_batch', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showResult('#batch-result', `<div class="error">${data.error}</div>`, true);
+                        return;
+                    }
+
+                    const results = data.results;
+                    const explanation = data.explanation;
+
+                    // Compter les résultats
+                    const atRisk = results.filter(r => r.prediction === 1).length;
+                    const safe = results.filter(r => r.prediction === 0).length;
+
+                    let html = `<div class="result">
+                        <h3>Résultats de la prédiction par lot</h3>
+                        <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; margin: 25px 0;">
+                            <div style="text-align: center; background: #e8f5e9; padding: 15px; border-radius: 10px; min-width: 150px;">
+                                <div style="font-size: 2em; color: #2e7d32;">${safe}</div>
+                                <div>Faible risque</div>
+                            </div>
+                            <div style="text-align: center; background: #ffebee; padding: 15px; border-radius: 10px; min-width: 150px;">
+                                <div style="font-size: 2em; color: #c62828;">${atRisk}</div>
+                                <div>Risque d'abandon</div>
+                            </div>
+                            <div style="text-align: center; background: #e3f2fd; padding: 15px; border-radius: 10px; min-width: 150px;">
+                                <div style="font-size: 2em; color: #1565c0;">${results.length}</div>
+                                <div>Étudiants analysés</div>
+                            </div>
+                        </div>
+
+                        <div class="info-box" style="background: #fff3e0; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                            <h4 style="color: #e65100; margin-top: 0;">${explanation.title}</h4>
+                            <ul style="margin: 10px 0;">
+                                <li>${explanation.positive}</li>
+                                <li>${explanation.negative}</li>
+                                <li>${explanation.magnitude}</li>
+                            </ul>
+                        </div>
+
+                        <div style="overflow-x:auto;">
+                        <table border="0" cellpadding="8" style="border-collapse:collapse; margin-top:20px; min-width:500px; background:#fff; font-size:0.95em; width:100%; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+                            <thead>
+                                <tr style="background:#4CAF50;color:#fff;">
+                                    <th style="text-align:left; padding:12px 15px; border-radius:6px 0 0 0;">Étudiant</th>
+                                    <th style="text-align:center;">Probabilité</th>
+                                    <th style="text-align:center;">Prédiction</th>
+                                    <th style="text-align:left; padding-left:15px; border-radius:0 6px 0 0;">Variables influentes</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                    results.forEach((row, idx) => {
+                        html += `<tr style="background:${idx % 2 === 0 ? '#f9f9f9' : '#f0f4f8'};">
+                            <td style="padding:10px 15px; border-bottom:1px solid #e0e0e0; font-weight:500;">Étudiant ${row.etudiant}</td>
+                            <td style="text-align:center; border-bottom:1px solid #e0e0e0;">${(row.probability * 100).toFixed(1)}%</td>
+                            <td style="text-align:center; border-bottom:1px solid #e0e0e0; font-weight:bold; color:${row.prediction === 1 ? '#c62828' : '#2e7d32'}">
+                                ${row.prediction === 1 ? 'Risque' : 'Sécurisé'}
+                            </td>
+                            <td style="padding-left:15px; border-bottom:1px solid #e0e0e0; font-size:0.9em;">${row.variables}</td>
+                        </tr>`;
+                    });
+
+                    html += `</tbody></table></div>
+                        <div style="margin-top:20px; text-align:center;">
+                            <button class="nav-btn" style="display:inline-flex; align-items:center; gap:8px;" onclick="exportToCSV(${JSON.stringify(results)})">
+                                <span>📥</span> Télécharger les résultats (CSV)
+                            </button>
+                        </div>
+                    </div>`;
+
+                    showResult('#batch-result', html);
+                })
+                .catch(error => {
+                    showResult('#batch-result', `<div class="error">Erreur lors du traitement: ${error.message}</div>`, true);
+                });
+            }
+        };
+
+        // Fonction pour afficher les résultats
+        function showResult(selector, html, isError=false) {
+            const el = document.querySelector(selector);
+            el.innerHTML = html;
+            el.className = isError ? 'result error' : 'result';
+            el.style.display = 'block';
+        }
+
+        // Initialiser l'interface
+        document.addEventListener('DOMContentLoaded', function() {
+            // Activer le premier onglet
+            document.querySelector('.tab.active').click();
+        });
+    </script>
+</body>
+</html>
