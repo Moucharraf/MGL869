@@ -1,7 +1,7 @@
 # Projet de Session - MGL869
 
 ## Description
-Ce projet est une application d'apprentissage automatique qui inclut un pipeline de traitement des données, un modèle de machine learning, et une interface utilisateur statique. Le projet est structuré pour inclure des tests pour le monitoring et les différences, des scripts de traitement des données, et un serveur pour déployer le modèle.
+Ce projet vise à prédire l'abandon scolaire en fonction du profil des étudiants. Il s'appuie sur un pipeline de traitement des données, un modèle de machine learning, et une interface utilisateur statique. Le projet inclut des scripts pour le traitement et la transformation des données, l'entraînement du modèle, ainsi que des tests pour le monitoring et la validation des différences. Un serveur permet de déployer le modèle pour une utilisation interactive.
 
 ## Structure du Projet
 ```
@@ -24,7 +24,6 @@ tests/
     test_monitoring.py
 ```
 
-- **Client_test.py** : Script pour tester le client.
 - **config.py** : Fichier de configuration pour les paramètres globaux.
 - **data_processor_transformer.py** : Script pour transformer les données.
 - **data_processor.py** : Script pour le traitement des données.
@@ -58,7 +57,11 @@ tests/
 2. Accédez à l'interface utilisateur via `index.html` dans le dossier `static/`.
 
 ## Tests
-Exécutez les tests pour le monitoring et les différences avec :
+Exécutez tous les tests avec la commande suivante :
+```bash
+python -m unittest discover tests -v
+```
+Pour des tests spécifiques :
 ```bash
 python -m unittest tests/test_monitoring.py -v
 ```
@@ -72,12 +75,12 @@ python -m unittest tests/test_monitoring.py -v
    ```bash
    docker run -p 5000:5000 projet-session
    ```
+3. Accédez à l'application via `http://localhost:5000`.
 
-## Auteurs
-- Moucharraf
-- Seyidina
-- Mohamed
-- Abdourrahmame
+## Auteur
+- Maazou Naboko Mouhamed Moucharraf
 
-## Licence
-Ce projet est sous licence MIT.
+## Contributeurs
+- Yahyani Mohamed
+- Mohamed Tine Seyidina
+- Youssoufi Garba Abdourrahmane
