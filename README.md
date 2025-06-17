@@ -8,6 +8,7 @@ Ce projet vise à prédire l'abandon scolaire en fonction du profil des étudian
 config.py
 data_processor_transformer.py
 data_processor.py
+data_validation.py
 Dockerfile
 model_pipeline.py
 README.md
@@ -15,11 +16,14 @@ requirements.txt
 server.py
 data/
     data.csv
+    sample_100_without_target.csv
+    schema.pbtxt
 models/
     gradient_boosting_pipeline.pkl
 static/
     index.html
 tests/
+    test_data_validation.py 
     test_differential.py
     test_monitoring.py
 ```
@@ -27,12 +31,22 @@ tests/
 - **config.py** : Fichier de configuration pour les paramètres globaux.
 - **data_processor_transformer.py** : Script pour transformer les données.
 - **data_processor.py** : Script pour le traitement des données.
+- **data_validation.py** : Script de validation des données avec TensorFlow Data Validation (TFDV).
 - **model_pipeline.py** : Contient le pipeline du modèle de machine learning.
 - **server.py** : Serveur pour déployer le modèle.
 - **data/** : Contient les données d'entrée.
 - **models/** : Contient les modèles entraînés.
 - **static/** : Contient les fichiers statiques pour l'interface utilisateur.
-- **tests/** : Contient les tests pour le monitoring et les différences.
+- **tests/** : Contient les tests pour le monitoring, les différences et la validation des données.
+
+## Dossier Data
+
+Le dossier `data/` contient toutes les données d'entrée ainsi que le schéma de validation utilisé dans le projet.
+
+- `data.csv` : Dataset complet utilisé pour l'entraînement et la validation.
+- `sample_100_without_target.csv` : Échantillon de 100 lignes (sans la variable cible), utilisé pour la validation des données et aussi pour tester la prediction par lot.
+- `schema.pbtxt` : Schéma de validation des données au format TensorFlow Data Validation (TFDV).
+
 
 ## Prérequis
 - Python 3.9 ou supérieur
@@ -61,7 +75,7 @@ Exécutez tous les tests avec la commande suivante :
 ```bash
 python -m unittest discover tests -v
 ```
-Pour des tests spécifiques :
+Pour des tests spécifiques (exemple : monitoring), utilisez :
 ```bash
 python -m unittest tests/test_monitoring.py -v
 ```
